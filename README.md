@@ -1,6 +1,6 @@
 # SlippiSessionAnalyzer
 
-**Dependancy**
+**Dependency**
 
 ```
 pip install py-slippi
