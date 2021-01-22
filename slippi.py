@@ -35,6 +35,7 @@ class SlippiWinLoss:
             if port == None:
                 continue
             port_num+=1
+            #TODO more intricate winner checking
             if "DEAD" not in str(port.leader.post.flags):
                 winner = self.__PLAYERS[port_num]
                 if winner not in self.__WINS:
@@ -60,6 +61,7 @@ for entry in os.scandir(args.dir):
         slip.determineWinner()
         
 print(slip.getWins())
+#TODO print all names if >2, let user select opponent to show record against
 
 
 
