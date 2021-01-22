@@ -15,9 +15,12 @@ class SlippiWinLoss:
         self.__ALL_PLAYERS = []
         
     def setGame(self, slp):
-        self.__GAME = Game(slp)
+        try:
+            self.__GAME = Game(slp)
+        except:
+            return False
         self.__PLAYERS.clear()
-        
+        return True
 
     def buildPlayersList(self):
         for player in self.__GAME.metadata.players:
@@ -28,8 +31,7 @@ class SlippiWinLoss:
                 self.__ALL_PLAYERS.append(player.netplay.name)
         if len(self.__PLAYERS)!=2:
             return False
-        else:
-            return True
+        return True
             
     def determineWinner(self):
         last_frame = self.__GAME.frames[-1]
@@ -81,11 +83,13 @@ slip = SlippiWinLoss()
 for entry in os.scandir(args.dir):
     if (entry.path.endswith(".slp")):
         fname = pathlib.Path(entry.path)
+        #TODO allow for no date to cover all replays and date ranges
         mtime = datetime.date.fromtimestamp(fname.stat().st_mtime)
         if mtime != date:
             continue
         slippi = entry.path
-        slip.setGame(slippi)
+        if not slip.setGame(slippi):
+            continue
         if not slip.buildPlayersList():
             continue            
         slip.determineWinner()
@@ -94,8 +98,12 @@ plist = slip.playerList()
 if len(plist) == 2:
     slip.getWins(plist[0], plist[1])
 elif len(plist) > 2:
-    [print(f"{plist.index(name)}: {name}, ", end='') for name in plist[1:]]
-    sel = input("select the two players you want to see the session W/L for (ex. '1 2')\n")
-    sel = sel.split(' ')
-    slip.getWins(plist[int(sel[0])], plist[int(sel[1])])
+    #TODO exclude self from this and only require one name as input 
+    [print(f"{plist.index(name)}: {name}, ", end='') for name in plist]
+    while True:
+        sel = input("select the two players you want to see the session W/L for (ex. '1 2')\n")
+        if sel == '':
+            break
+        sel = sel.split(' ')
+        slip.getWins(plist[int(sel[0])], plist[int(sel[1])])
     
