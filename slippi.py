@@ -10,36 +10,33 @@ date = args.date.date()
 class SlippiWinLoss:
     def __init__(self):
         self.__GAME = None
-        self.__CHARACTERS = {}
         self.__PLAYERS = []
         self.__WINS = {}
         
     def setGame(self, slp):
         self.__GAME = Game(slp)
-        self.__CHARACTERS.clear()
+        self.__PLAYERS.clear()
         
 
-    def buildCharactersDict(self):
+    def buildPlayersList(self):
         for player in self.__GAME.metadata.players:
             if player == None or player.netplay == None:
                 continue
-            chars = [*player.characters,]
-            for char in chars:
-                self.__CHARACTERS[char] = player.netplay.name
-            if len(self.__PLAYERS)==0:
-                self.__PLAYERS.append(player.netplay.name)
-        if len(self.__CHARACTERS)!=2:
+            self.__PLAYERS.append(player.netplay.name)
+        if len(self.__PLAYERS)!=2:
             return False
         else:
             return True
             
     def determineWinner(self):
         last_frame = self.__GAME.frames[-1]
+        port_num = -1
         for port in last_frame.ports:
             if port == None:
                 continue
+            port_num+=1
             if "DEAD" not in str(port.leader.post.flags):
-                winner = self.__CHARACTERS[port.leader.post.character]
+                winner = self.__PLAYERS[port_num]
                 if winner not in self.__WINS:
                     self.__WINS[winner] = 1
                 else:
@@ -58,7 +55,7 @@ for entry in os.scandir(args.dir):
             continue
         slippi = entry.path
         slip.setGame(slippi)
-        if not slip.buildCharactersDict():
+        if not slip.buildPlayersList():
             continue            
         slip.determineWinner()
         
