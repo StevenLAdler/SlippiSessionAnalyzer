@@ -36,6 +36,7 @@ class SlippiWinLoss:
     def determineWinner(self):
         last_frame = self.__GAME.frames[-1]
         lframe_data = []
+        #TODO check end game state to improve winner detection
         
         for port in last_frame.ports:
             if port == None:
@@ -65,8 +66,7 @@ class SlippiWinLoss:
         self.__GAME_LIST.append({winner: 1,
                                  loser: 0})
       
-
-    def playerList(self):
+    def getPlayerList(self):
         return self.__ALL_PLAYERS
     
     def getWins(self, p1, p2):
@@ -77,24 +77,25 @@ class SlippiWinLoss:
                 p1_cnt += game[p1]
                 p2_cnt += game[p2]
         print(f"{p1}: {p1_cnt} win(s)\n{p2}: {p2_cnt} win(s)")
-  
+
+#TODO move main into seperate file
 slip = SlippiWinLoss()
 
 for entry in os.scandir(args.dir):
-    if (entry.path.endswith(".slp")):
-        fname = pathlib.Path(entry.path)
+    if (entry.path.endswith(".slp")):        
         #TODO allow for no date to cover all replays and date ranges
+        file = entry.path
+        fname = pathlib.Path(entry.path)
         mtime = datetime.date.fromtimestamp(fname.stat().st_mtime)
         if mtime != date:
             continue
-        slippi = entry.path
-        if not slip.setGame(slippi):
+        if not slip.setGame(file):
             continue
         if not slip.buildPlayersList():
             continue            
         slip.determineWinner()
   
-plist = slip.playerList()  
+plist = slip.getPlayerList()  
 if len(plist) == 2:
     slip.getWins(plist[0], plist[1])
 elif len(plist) > 2:
