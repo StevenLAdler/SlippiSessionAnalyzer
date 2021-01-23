@@ -35,16 +35,18 @@ class SlippiWinLoss:
             
     def determineWinner(self):
         last_frame = self.__GAME.frames[-1]
-        lframe_data = []
-        #TODO check end game state to improve winner detection
+        lframe_data = []    
         
         for port in last_frame.ports:
             if port == None:
                 continue        
             lframe_data.append({'stocks': port.leader.post.stocks,
                          'damage': port.leader.post.damage})
-                    
-        if lframe_data[0]['stocks']>lframe_data[1]['stocks']:
+        
+        if "NO_CONTEST" in str(self.__GAME.end.method):
+            loser = self.__PLAYERS[int(self.__GAME.end.lras_initiator)]
+            winner = self.__PLAYERS[1-int(self.__GAME.end.lras_initiator)]
+        elif lframe_data[0]['stocks']>lframe_data[1]['stocks']:
             winner = self.__PLAYERS[0]
             loser = self.__PLAYERS[1]
             
@@ -78,8 +80,8 @@ class SlippiWinLoss:
                 p2_cnt += game[p2]
         print(f"{p1}: {p1_cnt} win(s)\n{p2}: {p2_cnt} win(s)")
     
-    def scanSlippiFiles(self, dir):
-        for entry in os.scandir(dir):
+    def scanSlippiFiles(self, d):
+        for entry in os.scandir(d):
             if entry.is_dir():
                 self.scanSlippiFiles(entry.path)
                 continue
@@ -96,19 +98,19 @@ class SlippiWinLoss:
                     continue            
                 self.determineWinner()
 
-#TODO move main into seperate file
-slip = SlippiWinLoss()
-slip.scanSlippiFiles(args.dir)
-plist = slip.getPlayerList()  
-if len(plist) == 2:
-    slip.getWins(plist[0], plist[1])
-elif len(plist) > 2:
-    #TODO exclude self from this and only require one name as input 
-    [print(f"{plist.index(name)}: {name}, ", end='') for name in plist]
-    while True:
-        sel = input("select the two players you want to see the session W/L for (ex. '1 2')\n")
-        if sel == '':
-            break
-        sel = sel.split(' ')
-        slip.getWins(plist[int(sel[0])], plist[int(sel[1])])
+if __name__ == "__main__":
+    slip = SlippiWinLoss()
+    slip.scanSlippiFiles(args.dir)
+    plist = slip.getPlayerList()  
+    if len(plist) == 2:
+        slip.getWins(plist[0], plist[1])
+    elif len(plist) > 2:
+        #TODO exclude self from this and only require one name as input 
+        [print(f"{plist.index(name)}: {name}, ", end='') for name in plist]
+        while True:
+            sel = input("\nselect the two players you want to see the session W/L for (ex. '1 2')\n")
+            if sel == '':
+                break
+            sel = sel.split(' ')
+            slip.getWins(plist[int(sel[0])], plist[int(sel[1])])
     
