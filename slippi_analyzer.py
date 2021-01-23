@@ -77,24 +77,28 @@ class SlippiWinLoss:
                 p1_cnt += game[p1]
                 p2_cnt += game[p2]
         print(f"{p1}: {p1_cnt} win(s)\n{p2}: {p2_cnt} win(s)")
+    
+    def scanSlippiFiles(self, dir):
+        for entry in os.scandir(dir):
+            if entry.is_dir():
+                self.scanSlippiFiles(entry.path)
+                continue
+            elif entry.path.endswith(".slp"):        
+                #TODO allow for no date to cover all replays and date ranges
+                file = entry.path
+                fname = pathlib.Path(entry.path)
+                mtime = datetime.date.fromtimestamp(fname.stat().st_mtime)
+                if mtime != date:
+                    continue
+                if not self.setGame(file):
+                    continue
+                if not self.buildPlayersList():
+                    continue            
+                self.determineWinner()
 
 #TODO move main into seperate file
 slip = SlippiWinLoss()
-
-for entry in os.scandir(args.dir):
-    if (entry.path.endswith(".slp")):        
-        #TODO allow for no date to cover all replays and date ranges
-        file = entry.path
-        fname = pathlib.Path(entry.path)
-        mtime = datetime.date.fromtimestamp(fname.stat().st_mtime)
-        if mtime != date:
-            continue
-        if not slip.setGame(file):
-            continue
-        if not slip.buildPlayersList():
-            continue            
-        slip.determineWinner()
-  
+slip.scanSlippiFiles(args.dir)
 plist = slip.getPlayerList()  
 if len(plist) == 2:
     slip.getWins(plist[0], plist[1])
